@@ -88,7 +88,17 @@
     PFQuery *query = [PFQuery queryWithClassName:self.parseClassName];
     
     // Follow relationship
-    [query whereKey:@"author" equalTo:[PFUser currentUser]];
+    if ([PFUser currentUser]) {
+        [query whereKey:@"author" equalTo:[PFUser currentUser]];
+    }
+    else {
+        // I added this so that when there is no currentUser, the query will not return any data
+        // Without this, when a user signs up and is logged in automatically, they briefly see a table with data
+        // before loadObjects is called and the table is refreshed.
+        // There are other ways to get an empty query, of course. With the below, I know that there
+        // is no such column with the value in the database.
+        [query whereKey:@"nonexistent" equalTo:@"doesn't exist"];
+    }
     
     return query;
 }
